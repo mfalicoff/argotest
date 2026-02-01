@@ -23,9 +23,10 @@ spec:
           clientSecret: ""
         operatorConfig:
           hostname: "arr-stack-k8s"
-          # Remove tags if not configured in Tailscale ACLs
-          # defaultTags:
-          #   - "tag:k8s"
+          # Empty string to disable tags (they must be defined in Tailscale ACLs first)
+          defaultTags: ""
+        proxyConfig:
+          defaultTags: ""
   destination:
     server: https://kubernetes.default.svc
     namespace: tailscale-operator
