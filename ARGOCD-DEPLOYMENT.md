@@ -96,8 +96,8 @@ In all ArgoCD manifests, update the repository URL:
 ```yaml
 # argocd/application.yaml and argocd/applicationset.yaml
 source:
-  repoURL: https://github.com/YOUR_USERNAME/arr-stack-helm.git  # <-- Update this
-  targetRevision: main
+  repoURL: https://github.com/mfalicoff/argotest.git  # <-- Update this
+  targetRevision: master
 ```
 
 ### Step 2: Customize Environment Values
@@ -195,7 +195,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/mfalicoff/argotest.git
-    targetRevision: main
+    targetRevision: master
     path: argocd
   destination:
     server: https://kubernetes.default.svc
@@ -259,7 +259,7 @@ git push
 
 ```yaml
 # Staging uses latest commit
-targetRevision: main
+targetRevision: master
 
 # Production uses tagged versions
 targetRevision: v1.2.3

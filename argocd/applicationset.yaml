@@ -23,7 +23,7 @@ spec:
 
       source:
         repoURL: https://github.com/mfalicoff/argotest.git # UPDATE THIS
-        targetRevision: main
+        targetRevision: master
         path: arr-stack
         helm:
           valueFiles:
@@ -80,7 +80,7 @@ spec:
 
       source:
         repoURL: https://github.com/mfalicoff/argotest.git # UPDATE THIS
-        targetRevision: main
+        targetRevision: master
         path: arr-stack
         helm:
           valueFiles:

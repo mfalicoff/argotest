@@ -80,23 +80,26 @@ arr-stack-helm/
 ### Method 1: GitOps Setup Script (Easiest) ⭐
 
 ```bash
-# Extract and setup
+# 0. Install ArgoCD (if needed)
+./bootstrap-argocd.sh
+
+# 1. Extract and setup
 tar -xzf arr-stack-argocd-gitops.tar.gz
 cd arr-stack-helm
 
-# Run automated setup
+# 2. Run automated setup
 ./gitops-setup.sh
 # This script:
 # - Detects your node name
 # - Updates all configurations
 # - Shows you what changed
 
-# Review and commit
+# 3. Review and commit
 git add .
 git commit -m "Configure for my cluster"
 git push
 
-# Deploy (ONLY kubectl command needed!)
+# 4. Deploy (ONLY kubectl command needed!)
 kubectl apply -f argocd-apps/root-app.yaml
 ```
 

@@ -87,9 +87,9 @@ fi
 # Update Git repo URLs
 echo "Updating Git repository URLs..."
 if [[ "$OSTYPE" == "darwin"* ]]; then
-    find argocd-apps -name "*.yaml" -exec sed -i '' "s|https://github.com/yourusername/arr-stack-helm.git|$GIT_REPO|g" {} \;
+    find argocd-apps -name "*.yaml" -exec sed -i '' "s|https://github.com/mfalicoff/argotest.git|$GIT_REPO|g" {} \;
 else
-    find argocd-apps -name "*.yaml" -exec sed -i "s|https://github.com/yourusername/arr-stack-helm.git|$GIT_REPO|g" {} \;
+    find argocd-apps -name "*.yaml" -exec sed -i "s|https://github.com/mfalicoff/argotest.git|$GIT_REPO|g" {} \;
 fi
 echo "✅ Updated argocd-apps/*.yaml"
 

@@ -14,7 +14,7 @@ patches:
     patch: |-
       - op: replace
         path: /spec/nodeAffinity/required/nodeSelectorTerms/0/matchExpressions/0/values/0
-        value: orbstack  # UPDATE THIS
+        value: your-actual-node-name  # UPDATE THIS
 
   - target:
       kind: PersistentVolume
@@ -22,4 +22,4 @@ patches:
     patch: |-
       - op: replace
         path: /spec/nodeAffinity/required/nodeSelectorTerms/0/matchExpressions/0/values/0
-        value: orbstack  # UPDATE THIS
+        value: your-actual-node-name  # UPDATE THIS

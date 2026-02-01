@@ -47,6 +47,40 @@ your-repo/
 
 ## 🚀 Complete Setup (GitOps Style)
 
+### Step 0: Install ArgoCD (If Not Already Installed)
+
+**First, check if ArgoCD is installed:**
+
+```bash
+kubectl get namespace argocd
+```
+
+If you get an error, ArgoCD is not installed. Install it:
+
+```bash
+# Run the bootstrap script
+./bootstrap-argocd.sh
+
+# Or manually:
+kubectl create namespace argocd
+kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+
+# Wait for ArgoCD to be ready
+kubectl wait --for=condition=available --timeout=300s deployment/argocd-server -n argocd
+
+# Get admin password
+kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
+```
+
+**Access ArgoCD UI (optional but recommended):**
+
+```bash
+kubectl port-forward svc/argocd-server -n argocd 8080:443
+# Open https://localhost:8080
+# Username: admin
+# Password: (from command above)
+```
+
 ### Step 1: Clone and Configure
 
 ```bash

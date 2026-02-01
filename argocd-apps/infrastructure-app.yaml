@@ -10,7 +10,7 @@ spec:
 
   source:
     repoURL: https://github.com/mfalicoff/argotest.git # UPDATE THIS
-    targetRevision: main
+    targetRevision: master
     path: infrastructure/overlays/production # Uses Kustomize overlay
 
   destination:

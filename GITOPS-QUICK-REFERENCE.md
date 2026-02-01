@@ -48,7 +48,7 @@ sonarr:
 
 All files in `argocd-apps/*.yaml`:
 ```yaml
-repoURL: https://github.com/YOUR_USERNAME/arr-stack-helm.git  # Change this
+repoURL: https://github.com/mfalicoff/argotest.git  # Change this
 ```
 
 **3. Domain (1 file):**
@@ -165,7 +165,7 @@ PVCs    Deploys services
 ### Infrastructure App
 - StorageClass: `local-path`
 - PV: `arr-media-pv` (500Gi)
-- PV: `arr-downloads-pv` (200Gi)  
+- PV: `arr-downloads-pv` (200Gi)
 - PVC: `arr-media-pvc`
 - PVC: `arr-downloads-pvc`
 
