@@ -1,0 +1,66 @@
+{{- if .Values.prowlarr.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "arr-stack.componentName" (dict "component" "prowlarr" "context" .) }}
+  labels:
+    {{- include "arr-stack.labels" . | nindent 4 }}
+    {{- include "arr-stack.componentLabels" "prowlarr" | nindent 4 }}
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      {{- include "arr-stack.selectorLabels" . | nindent 6 }}
+      {{- include "arr-stack.componentLabels" "prowlarr" | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "arr-stack.selectorLabels" . | nindent 8 }}
+        {{- include "arr-stack.componentLabels" "prowlarr" | nindent 8 }}
+      annotations:
+        {{- with .Values.prowlarr.glance }}
+        glance.name: {{ .name | quote }}
+        glance.icon: {{ .icon | quote }}
+        glance.url: "https://{{ $.Values.prowlarr.ingress.hostname }}.{{ $.Values.ingress.domain }}"
+        glance.description: {{ .description | quote }}
+        {{- end }}
+    spec:
+      restartPolicy: Always
+      {{- with .Values.prowlarr.nodeAffinity }}
+      affinity:
+        nodeAffinity:
+          {{- toYaml . | nindent 10 }}
+      {{- end }}
+      containers:
+      - name: prowlarr
+        image: {{ include "arr-stack.image" (dict "image" .Values.prowlarr.image) }}
+        imagePullPolicy: {{ .Values.prowlarr.image.pullPolicy }}
+        ports:
+        - name: http
+          containerPort: {{ .Values.prowlarr.service.port }}
+          protocol: TCP
+        env:
+        - name: PUID
+          value: {{ .Values.global.puid | quote }}
+        - name: PGID
+          value: {{ .Values.global.pgid | quote }}
+        - name: TZ
+          value: {{ .Values.global.timezone | quote }}
+        volumeMounts:
+        - name: config
+          mountPath: /config
+        {{- with .Values.prowlarr.resources }}
+        resources:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+      volumes:
+      - name: config
+        {{- if .Values.prowlarr.persistence.config.enabled }}
+        persistentVolumeClaim:
+          claimName: {{ include "arr-stack.componentName" (dict "component" "prowlarr-config" "context" .) }}
+        {{- else }}
+        emptyDir: {}
+        {{- end }}
+{{- end }}

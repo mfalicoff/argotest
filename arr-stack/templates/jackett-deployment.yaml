@@ -1,0 +1,85 @@
+{{- if .Values.jackett.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "arr-stack.componentName" (dict "component" "jackett" "context" .) }}
+  labels:
+    {{- include "arr-stack.labels" . | nindent 4 }}
+    {{- include "arr-stack.componentLabels" "jackett" | nindent 4 }}
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      {{- include "arr-stack.selectorLabels" . | nindent 6 }}
+      {{- include "arr-stack.componentLabels" "jackett" | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "arr-stack.selectorLabels" . | nindent 8 }}
+        {{- include "arr-stack.componentLabels" "jackett" | nindent 8 }}
+      annotations:
+        {{- with .Values.jackett.glance }}
+        glance.name: {{ .name | quote }}
+        glance.icon: {{ .icon | quote }}
+        glance.url: "https://{{ $.Values.jackett.ingress.hostname }}.{{ $.Values.ingress.domain }}"
+        glance.description: {{ .description | quote }}
+        {{- end }}
+    spec:
+      restartPolicy: Always
+      {{- with .Values.jackett.nodeAffinity }}
+      affinity:
+        nodeAffinity:
+          {{- toYaml . | nindent 10 }}
+      {{- end }}
+      containers:
+      - name: jackett
+        image: {{ include "arr-stack.image" (dict "image" .Values.jackett.image) }}
+        imagePullPolicy: {{ .Values.jackett.image.pullPolicy }}
+        ports:
+        - name: http
+          containerPort: {{ .Values.jackett.service.port }}
+          protocol: TCP
+        env:
+        - name: PUID
+          value: {{ .Values.global.puid | quote }}
+        - name: PGID
+          value: {{ .Values.global.pgid | quote }}
+        - name: TZ
+          value: {{ .Values.global.timezone | quote }}
+        volumeMounts:
+        - name: config
+          mountPath: /config
+        - name: downloads
+          mountPath: /downloads
+        {{- with .Values.jackett.resources }}
+        resources:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+      volumes:
+      - name: config
+        {{- if .Values.jackett.persistence.config.enabled }}
+        persistentVolumeClaim:
+          claimName: {{ include "arr-stack.componentName" (dict "component" "jackett-config" "context" .) }}
+        {{- else }}
+        emptyDir: {}
+        {{- end }}
+      - name: downloads
+        {{- if eq .Values.storage.downloads.type "pvc" }}
+        persistentVolumeClaim:
+          {{- if .Values.storage.downloads.existingClaim }}
+          claimName: {{ .Values.storage.downloads.existingClaim }}
+          {{- else }}
+          claimName: {{ include "arr-stack.fullname" . }}-downloads
+          {{- end }}
+        {{- else if eq .Values.storage.downloads.type "hostPath" }}
+        hostPath:
+          path: {{ include "arr-stack.storagePath" (dict "type" "downloads" "context" .) }}
+          type: Directory
+        {{- else if eq .Values.storage.downloads.type "nfs" }}
+        nfs:
+          server: {{ .Values.storage.downloads.server }}
+          path: {{ .Values.storage.downloads.path }}
+        {{- end }}
+{{- end }}

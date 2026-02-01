@@ -1,0 +1,329 @@
+# Updated values.yaml for arr-stack with Local PVC support
+
+global:
+  storageClass: local-path  # Use our local-path StorageClass
+  timezone: America/Toronto
+  puid: 1000
+  pgid: 1000
+
+# Storage configuration - now using PVC references
+storage:
+  # For media and downloads, we'll use pre-created PVCs
+  media:
+    type: pvc  # Changed from hostPath to pvc
+    existingClaim: arr-media-pvc  # Reference to pre-created PVC
+    # Alternative: let Helm create dynamic PVC
+    # type: pvc
+    # size: 500Gi
+  
+  downloads:
+    type: pvc
+    existingClaim: arr-downloads-pvc
+    # Alternative dynamic:
+    # type: pvc
+    # size: 200Gi
+  
+  appdata:
+    # Config data uses dynamic PVCs (created per service)
+    type: pvc
+    storageClass: local-path
+
+# Ingress configuration
+ingress:
+  enabled: true
+  className: caddy
+  domain: local.mazilious.org
+  tls:
+    enabled: true
+  annotations: {}
+
+# Sonarr - uses local PVCs
+sonarr:
+  enabled: true
+  image:
+    repository: lscr.io/linuxserver/sonarr
+    tag: "4.0.16"
+    digest: "sha256:02b4d538d351d6e35882a021c08e8600fe95d28860fb1dd724b597166e7221ca"
+    pullPolicy: IfNotPresent
+  
+  service:
+    type: ClusterIP
+    port: 8989
+  
+  resources:
+    limits:
+      memory: 1Gi
+      cpu: 1000m
+    requests:
+      memory: 512Mi
+      cpu: 500m
+  
+  persistence:
+    config:
+      enabled: true
+      size: 10Gi
+      storageClass: local-path  # Config on local storage
+    tv:
+      enabled: true
+      # Will use storage.media.existingClaim
+    downloads:
+      enabled: true
+      # Will use storage.downloads.existingClaim
+  
+  # Node affinity to ensure pod runs on node with local storage
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - your-node-name  # UPDATE THIS
+  
+  ingress:
+    enabled: true
+    hostname: sonarr
+  
+  glance:
+    name: Sonarr
+    icon: sh:sonarr
+    description: TV Show Manager
+
+# Radarr - uses local PVCs
+radarr:
+  enabled: true
+  image:
+    repository: lscr.io/linuxserver/radarr
+    tag: "6.0.4"
+    digest: "sha256:270f25698624b57b86ca119cc95399d7ff15be8297095b4e1223fd5b549b732c"
+    pullPolicy: IfNotPresent
+  
+  service:
+    type: ClusterIP
+    port: 7878
+  
+  resources:
+    limits:
+      memory: 1Gi
+      cpu: 1000m
+    requests:
+      memory: 512Mi
+      cpu: 500m
+  
+  persistence:
+    config:
+      enabled: true
+      size: 10Gi
+      storageClass: local-path
+    movies:
+      enabled: true
+    downloads:
+      enabled: true
+  
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - your-node-name  # UPDATE THIS
+  
+  ingress:
+    enabled: true
+    hostname: radarr
+  
+  glance:
+    name: Radarr
+    icon: sh:radarr
+    description: Movie Manager
+
+# Jellyseerr - config only on local PVC
+jellyseerr:
+  enabled: true
+  image:
+    repository: fallenbagel/jellyseerr
+    tag: "2.7.3"
+    digest: "sha256:4538137bc5af902dece165f2bf73776d9cf4eafb6dd714670724af8f3eb77764"
+    pullPolicy: IfNotPresent
+  
+  initContainer: true
+  
+  env:
+    LOG_LEVEL: debug
+  
+  service:
+    type: ClusterIP
+    port: 5055
+  
+  resources:
+    limits:
+      memory: 512Mi
+      cpu: 500m
+    requests:
+      memory: 256Mi
+      cpu: 250m
+  
+  persistence:
+    config:
+      enabled: true
+      size: 5Gi
+      storageClass: local-path
+  
+  healthcheck:
+    enabled: true
+    startPeriod: 20
+    timeout: 3
+    interval: 15
+    retries: 3
+  
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - your-node-name  # UPDATE THIS
+  
+  ingress:
+    enabled: true
+    hostname: jellyseerr
+  
+  glance:
+    name: Jellyseerr
+    icon: sh:jellyseerr
+    description: Movie Requests
+
+# Byparr
+byparr:
+  enabled: true
+  image:
+    repository: ghcr.io/thephaseless/byparr
+    tag: "2.0.1"
+    digest: "sha256:dd2ab939fd616c17da5f58d85f5264e5ad125de1db732f3f27a4b52e96b78cbb"
+    pullPolicy: IfNotPresent
+  
+  shmSize: 2Gi
+  
+  service:
+    type: ClusterIP
+    port: 8191
+  
+  resources:
+    limits:
+      memory: 2Gi
+      cpu: 1000m
+    requests:
+      memory: 1Gi
+      cpu: 500m
+  
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - your-node-name  # UPDATE THIS
+  
+  ingress:
+    enabled: true
+    hostname: byparr
+  
+  glance:
+    name: Byparr
+    icon: sh:cloudflare
+    description: FlareSolverr Alternative
+
+# Prowlarr
+prowlarr:
+  enabled: true
+  image:
+    repository: lscr.io/linuxserver/prowlarr
+    tag: "2.3.0"
+    digest: "sha256:d3e9307b320b6772749a2cf8fc2712e9e824c4930b034680ad4d08a9e2f25884"
+    pullPolicy: IfNotPresent
+  
+  service:
+    type: ClusterIP
+    port: 9696
+  
+  resources:
+    limits:
+      memory: 512Mi
+      cpu: 500m
+    requests:
+      memory: 256Mi
+      cpu: 250m
+  
+  persistence:
+    config:
+      enabled: true
+      size: 5Gi
+      storageClass: local-path
+  
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - your-node-name  # UPDATE THIS
+  
+  ingress:
+    enabled: true
+    hostname: prowlarr
+  
+  glance:
+    name: Prowlarr
+    icon: sh:prowlarr
+    description: Index Manager
+
+# Jackett
+jackett:
+  enabled: false
+  image:
+    repository: linuxserver/jackett
+    tag: "0.24.993"
+    digest: "sha256:f64482ae7340d6d170e77fde88fba2495bd34c5bc2d2eebfba85d39ff695fcb7"
+    pullPolicy: IfNotPresent
+  
+  service:
+    type: ClusterIP
+    port: 9117
+  
+  resources:
+    limits:
+      memory: 512Mi
+      cpu: 500m
+    requests:
+      memory: 256Mi
+      cpu: 250m
+  
+  persistence:
+    config:
+      enabled: true
+      size: 5Gi
+      storageClass: local-path
+    downloads:
+      enabled: true
+  
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - your-node-name  # UPDATE THIS
+  
+  ingress:
+    enabled: true
+    hostname: jackett
+  
+  glance:
+    name: Jackett
+    icon: sh:jackett
+    description: Index Manager

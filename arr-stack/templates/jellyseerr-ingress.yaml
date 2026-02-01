@@ -1,0 +1,37 @@
+{{- if and .Values.jellyseerr.enabled .Values.jellyseerr.ingress.enabled .Values.ingress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "arr-stack.componentName" (dict "component" "jellyseerr" "context" .) }}
+  labels:
+    {{- include "arr-stack.labels" . | nindent 4 }}
+    {{- include "arr-stack.componentLabels" "jellyseerr" | nindent 4 }}
+  annotations:
+    {{- with .Values.ingress.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+    caddy.reverse_proxy: "http://{{ include "arr-stack.componentName" (dict "component" "jellyseerr" "context" .) }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.jellyseerr.service.port }}"
+spec:
+  {{- if .Values.ingress.className }}
+  ingressClassName: {{ .Values.ingress.className }}
+  {{- end }}
+  {{- if .Values.ingress.tls.enabled }}
+  tls:
+  - hosts:
+    - {{ .Values.jellyseerr.ingress.hostname }}.{{ .Values.ingress.domain }}
+    {{- if .Values.ingress.tls.secretName }}
+    secretName: {{ .Values.ingress.tls.secretName }}-jellyseerr
+    {{- end }}
+  {{- end }}
+  rules:
+  - host: {{ .Values.jellyseerr.ingress.hostname }}.{{ .Values.ingress.domain }}
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ include "arr-stack.componentName" (dict "component" "jellyseerr" "context" .) }}
+            port:
+              number: {{ .Values.jellyseerr.service.port }}
+{{- end }}

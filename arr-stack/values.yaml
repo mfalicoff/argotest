@@ -1,0 +1,237 @@
+# Global settings
+global:
+  storageClass: ""  # Leave empty for default StorageClass
+  timezone: America/Toronto
+  puid: 1000
+  pgid: 1000
+
+# Ingress configuration
+ingress:
+  enabled: true
+  className: caddy  # Use "caddy" if using Caddy Ingress Controller
+  annotations: {}
+    # caddy.ingress.kubernetes.io/tls-issuer: "acme"
+  domain: local.mazilious.org
+  tls:
+    enabled: true
+    # secretName: arr-stack-tls  # Optional: specify a TLS secret
+
+# Storage paths - adjust these to match your storage solution
+storage:
+  # For NFS/hostPath/etc., adjust based on your cluster setup
+  media:
+    type: hostPath  # Options: hostPath, nfs, pvc
+    path: /mnt/user/media
+  downloads:
+    type: hostPath
+    path: /mnt/user/downloads
+  appdata:
+    type: hostPath
+    path: /mnt/user/appdata
+
+# Sonarr configuration
+sonarr:
+  enabled: true
+  image:
+    repository: lscr.io/linuxserver/sonarr
+    tag: "4.0.16"
+    digest: "sha256:02b4d538d351d6e35882a021c08e8600fe95d28860fb1dd724b597166e7221ca"
+    pullPolicy: IfNotPresent
+  
+  service:
+    type: ClusterIP
+    port: 8989
+  
+  resources: {}
+    # limits:
+    #   memory: 1Gi
+    # requests:
+    #   memory: 512Mi
+  
+  persistence:
+    config:
+      enabled: true
+      size: 5Gi
+      # storageClass: ""
+      # existingClaim: ""
+    tv:
+      enabled: true
+      # Uses storage.media.path/tv
+    downloads:
+      enabled: true
+      # Uses storage.downloads.path
+  
+  ingress:
+    enabled: true
+    hostname: sonarr
+    # Full URL will be: sonarr.local.mazilious.org
+  
+  glance:
+    name: Sonarr
+    icon: sh:sonarr
+    description: TV Show Manager
+
+# Radarr configuration
+radarr:
+  enabled: true
+  image:
+    repository: lscr.io/linuxserver/radarr
+    tag: "6.0.4"
+    digest: "sha256:270f25698624b57b86ca119cc95399d7ff15be8297095b4e1223fd5b549b732c"
+    pullPolicy: IfNotPresent
+  
+  service:
+    type: ClusterIP
+    port: 7878
+  
+  resources: {}
+  
+  persistence:
+    config:
+      enabled: true
+      size: 5Gi
+    movies:
+      enabled: true
+      # Uses storage.media.path/movies
+    downloads:
+      enabled: true
+  
+  ingress:
+    enabled: true
+    hostname: radarr
+  
+  glance:
+    name: Radarr
+    icon: sh:radarr
+    description: Movie Manager
+
+# Jellyseerr configuration
+jellyseerr:
+  enabled: true
+  image:
+    repository: fallenbagel/jellyseerr
+    tag: "2.7.3"
+    digest: "sha256:4538137bc5af902dece165f2bf73776d9cf4eafb6dd714670724af8f3eb77764"
+    pullPolicy: IfNotPresent
+  
+  # Enable init container
+  initContainer: true
+  
+  env:
+    LOG_LEVEL: debug
+  
+  service:
+    type: ClusterIP
+    port: 5055
+  
+  resources: {}
+  
+  persistence:
+    config:
+      enabled: true
+      size: 2Gi
+  
+  healthcheck:
+    enabled: true
+    startPeriod: 20
+    timeout: 3
+    interval: 15
+    retries: 3
+  
+  ingress:
+    enabled: true
+    hostname: jellyseerr
+  
+  glance:
+    name: Jellyseerr
+    icon: sh:jellyseerr
+    description: Movie Requests
+
+# Byparr configuration
+byparr:
+  enabled: true
+  image:
+    repository: ghcr.io/thephaseless/byparr
+    tag: "2.0.1"
+    digest: "sha256:dd2ab939fd616c17da5f58d85f5264e5ad125de1db732f3f27a4b52e96b78cbb"
+    pullPolicy: IfNotPresent
+  
+  # Shared memory size
+  shmSize: 2Gi
+  
+  service:
+    type: ClusterIP
+    port: 8191
+  
+  resources:
+    limits:
+      memory: 2Gi  # For shm_size equivalent
+  
+  ingress:
+    enabled: true
+    hostname: byparr
+  
+  glance:
+    name: Byparr
+    icon: sh:cloudflare
+    description: FlareSolverr Alternative
+
+# Prowlarr configuration
+prowlarr:
+  enabled: true
+  image:
+    repository: lscr.io/linuxserver/prowlarr
+    tag: "2.3.0"
+    digest: "sha256:d3e9307b320b6772749a2cf8fc2712e9e824c4930b034680ad4d08a9e2f25884"
+    pullPolicy: IfNotPresent
+  
+  service:
+    type: ClusterIP
+    port: 9696
+  
+  resources: {}
+  
+  persistence:
+    config:
+      enabled: true
+      size: 2Gi
+  
+  ingress:
+    enabled: true
+    hostname: prowlarr
+  
+  glance:
+    name: Prowlarr
+    icon: sh:prowlarr
+    description: Index Manager
+
+# Jackett configuration
+jackett:
+  enabled: true
+  image:
+    repository: linuxserver/jackett
+    tag: "0.24.993"
+    digest: "sha256:f64482ae7340d6d170e77fde88fba2495bd34c5bc2d2eebfba85d39ff695fcb7"
+    pullPolicy: IfNotPresent
+  
+  service:
+    type: ClusterIP
+    port: 9117
+  
+  resources: {}
+  
+  persistence:
+    config:
+      enabled: true
+      size: 2Gi
+    downloads:
+      enabled: true
+  
+  ingress:
+    enabled: true
+    hostname: jackett
+  
+  glance:
+    name: Jackett
+    icon: sh:jackett
+    description: Index Manager

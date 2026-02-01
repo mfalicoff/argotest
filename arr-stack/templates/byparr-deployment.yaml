@@ -1,0 +1,59 @@
+{{- if .Values.byparr.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "arr-stack.componentName" (dict "component" "byparr" "context" .) }}
+  labels:
+    {{- include "arr-stack.labels" . | nindent 4 }}
+    {{- include "arr-stack.componentLabels" "byparr" | nindent 4 }}
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      {{- include "arr-stack.selectorLabels" . | nindent 6 }}
+      {{- include "arr-stack.componentLabels" "byparr" | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "arr-stack.selectorLabels" . | nindent 8 }}
+        {{- include "arr-stack.componentLabels" "byparr" | nindent 8 }}
+      annotations:
+        {{- with .Values.byparr.glance }}
+        glance.name: {{ .name | quote }}
+        glance.icon: {{ .icon | quote }}
+        glance.url: "https://{{ $.Values.byparr.ingress.hostname }}.{{ $.Values.ingress.domain }}"
+        glance.description: {{ .description | quote }}
+        {{- end }}
+    spec:
+      restartPolicy: Always
+      {{- with .Values.byparr.nodeAffinity }}
+      affinity:
+        nodeAffinity:
+          {{- toYaml . | nindent 10 }}
+      {{- end }}
+      containers:
+      - name: byparr
+        image: {{ include "arr-stack.image" (dict "image" .Values.byparr.image) }}
+        imagePullPolicy: {{ .Values.byparr.image.pullPolicy }}
+        ports:
+        - name: http
+          containerPort: {{ .Values.byparr.service.port }}
+          protocol: TCP
+        env:
+        - name: TZ
+          value: {{ .Values.global.timezone | quote }}
+        volumeMounts:
+        - name: dshm
+          mountPath: /dev/shm
+        {{- with .Values.byparr.resources }}
+        resources:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+      volumes:
+      - name: dshm
+        emptyDir:
+          medium: Memory
+          sizeLimit: {{ .Values.byparr.shmSize }}
+{{- end }}

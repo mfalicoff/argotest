@@ -1,0 +1,19 @@
+{{- if .Values.jellyseerr.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "arr-stack.componentName" (dict "component" "jellyseerr" "context" .) }}
+  labels:
+    {{- include "arr-stack.labels" . | nindent 4 }}
+    {{- include "arr-stack.componentLabels" "jellyseerr" | nindent 4 }}
+spec:
+  type: {{ .Values.jellyseerr.service.type }}
+  ports:
+  - port: {{ .Values.jellyseerr.service.port }}
+    targetPort: http
+    protocol: TCP
+    name: http
+  selector:
+    {{- include "arr-stack.selectorLabels" . | nindent 4 }}
+    {{- include "arr-stack.componentLabels" "jellyseerr" | nindent 4 }}
+{{- end }}

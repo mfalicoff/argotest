@@ -1,0 +1,153 @@
+# Example custom values for arr-stack
+# Copy this file and modify for your environment:
+# helm install arr-stack ./arr-stack -f my-values.yaml
+
+# Update to your domain
+ingress:
+  enabled: true
+  className: caddy
+  domain: my-domain.com  # Change this!
+  tls:
+    enabled: true
+  annotations:
+    # Example Caddy annotations
+    # caddy.ingress.kubernetes.io/tls-issuer: "acme"
+    # caddy.ingress.kubernetes.io/tailscale: "true"
+
+# Adjust global settings
+global:
+  timezone: America/New_York  # Your timezone
+  puid: 1000  # Your user ID (run: id -u)
+  pgid: 1000  # Your group ID (run: id -g)
+  storageClass: ""  # Leave empty for default, or specify: "nfs-client", "longhorn", etc.
+
+# Configure storage paths for your environment
+storage:
+  media:
+    type: hostPath  # Options: hostPath, nfs, pvc
+    path: /mnt/media  # Update to your media path
+    # For NFS:
+    # type: nfs
+    # server: 192.168.1.100
+    # path: /volume1/media
+  
+  downloads:
+    type: hostPath
+    path: /mnt/downloads  # Update to your downloads path
+  
+  appdata:
+    type: hostPath
+    path: /mnt/appdata  # Update to your appdata path
+
+# Enable/disable services as needed
+sonarr:
+  enabled: true
+  resources:
+    limits:
+      memory: 1Gi
+      cpu: 1000m
+    requests:
+      memory: 512Mi
+      cpu: 500m
+  persistence:
+    config:
+      enabled: true
+      size: 5Gi
+      # storageClass: "nfs-client"  # Override global storageClass if needed
+
+radarr:
+  enabled: true
+  resources:
+    limits:
+      memory: 1Gi
+      cpu: 1000m
+    requests:
+      memory: 512Mi
+      cpu: 500m
+  persistence:
+    config:
+      enabled: true
+      size: 5Gi
+
+jellyseerr:
+  enabled: true
+  resources:
+    limits:
+      memory: 512Mi
+      cpu: 500m
+    requests:
+      memory: 256Mi
+      cpu: 250m
+  persistence:
+    config:
+      enabled: true
+      size: 2Gi
+
+byparr:
+  enabled: true
+  shmSize: 2Gi  # Shared memory for browser
+  resources:
+    limits:
+      memory: 2Gi
+      cpu: 1000m
+    requests:
+      memory: 1Gi
+      cpu: 500m
+
+prowlarr:
+  enabled: true
+  resources:
+    limits:
+      memory: 512Mi
+      cpu: 500m
+    requests:
+      memory: 256Mi
+      cpu: 250m
+  persistence:
+    config:
+      enabled: true
+      size: 2Gi
+
+jackett:
+  enabled: false  # Often only need one of Prowlarr or Jackett
+  resources:
+    limits:
+      memory: 512Mi
+      cpu: 500m
+    requests:
+      memory: 256Mi
+      cpu: 250m
+  persistence:
+    config:
+      enabled: true
+      size: 2Gi
+
+# Example: Using NFS for all storage
+# storage:
+#   media:
+#     type: nfs
+#     server: nas.local
+#     path: /mnt/pool/media
+#     mountOptions:
+#       - nfsvers=4.1
+#       - hard
+#   downloads:
+#     type: nfs
+#     server: nas.local
+#     path: /mnt/pool/downloads
+#   appdata:
+#     type: nfs
+#     server: nas.local
+#     path: /mnt/pool/appdata
+
+# Example: Using dynamic PVC provisioning
+# global:
+#   storageClass: "longhorn"  # or nfs-client, ceph-block, etc.
+# 
+# storage:
+#   media:
+#     type: pvc
+#   downloads:
+#     type: pvc
+#   appdata:
+#     type: pvc

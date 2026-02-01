@@ -1,0 +1,51 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: arr-stack
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+
+  source:
+    repoURL: https://github.com/mfalicoff/argotest.git # UPDATE THIS
+    targetRevision: main
+    path: arr-stack
+    helm:
+      # Use production values
+      valueFiles:
+        - values.yaml
+        - ../environments/production/values.yaml
+
+      # Optional: Override specific values
+      # values: |
+      #   ingress:
+      #     domain: mazilious.org
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: media
+
+  syncPolicy:
+    automated:
+      prune: true # Remove resources when removed from Git
+      selfHeal: true # Auto-sync when cluster state differs from Git
+      allowEmpty: false
+    syncOptions:
+      - CreateNamespace=true # Auto-create the namespace
+      - PrunePropagationPolicy=foreground
+      - PruneLast=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
+
+  # Ignore differences in certain fields
+  ignoreDifferences:
+    - group: apps
+      kind: Deployment
+      jsonPointers:
+        - /spec/replicas # Ignore if HPA is used

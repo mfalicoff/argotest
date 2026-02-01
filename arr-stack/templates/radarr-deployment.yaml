@@ -1,0 +1,104 @@
+{{- if .Values.radarr.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "arr-stack.componentName" (dict "component" "radarr" "context" .) }}
+  labels:
+    {{- include "arr-stack.labels" . | nindent 4 }}
+    {{- include "arr-stack.componentLabels" "radarr" | nindent 4 }}
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      {{- include "arr-stack.selectorLabels" . | nindent 6 }}
+      {{- include "arr-stack.componentLabels" "radarr" | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "arr-stack.selectorLabels" . | nindent 8 }}
+        {{- include "arr-stack.componentLabels" "radarr" | nindent 8 }}
+      annotations:
+        {{- with .Values.radarr.glance }}
+        glance.name: {{ .name | quote }}
+        glance.icon: {{ .icon | quote }}
+        glance.url: "https://{{ $.Values.radarr.ingress.hostname }}.{{ $.Values.ingress.domain }}"
+        glance.description: {{ .description | quote }}
+        {{- end }}
+    spec:
+      restartPolicy: Always
+      {{- with .Values.radarr.nodeAffinity }}
+      affinity:
+        nodeAffinity:
+          {{- toYaml . | nindent 10 }}
+      {{- end }}
+      containers:
+      - name: radarr
+        image: {{ include "arr-stack.image" (dict "image" .Values.radarr.image) }}
+        imagePullPolicy: {{ .Values.radarr.image.pullPolicy }}
+        ports:
+        - name: http
+          containerPort: {{ .Values.radarr.service.port }}
+          protocol: TCP
+        env:
+        - name: PUID
+          value: {{ .Values.global.puid | quote }}
+        - name: PGID
+          value: {{ .Values.global.pgid | quote }}
+        - name: TZ
+          value: {{ .Values.global.timezone | quote }}
+        volumeMounts:
+        - name: config
+          mountPath: /config
+        - name: movies
+          mountPath: /movies
+        - name: downloads
+          mountPath: /downloads
+        {{- with .Values.radarr.resources }}
+        resources:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+      volumes:
+      - name: config
+        {{- if .Values.radarr.persistence.config.enabled }}
+        persistentVolumeClaim:
+          claimName: {{ include "arr-stack.componentName" (dict "component" "radarr-config" "context" .) }}
+        {{- else }}
+        emptyDir: {}
+        {{- end }}
+      - name: movies
+        {{- if eq .Values.storage.media.type "pvc" }}
+        persistentVolumeClaim:
+          {{- if .Values.storage.media.existingClaim }}
+          claimName: {{ .Values.storage.media.existingClaim }}
+          {{- else }}
+          claimName: {{ include "arr-stack.fullname" . }}-media
+          {{- end }}
+        {{- else if eq .Values.storage.media.type "hostPath" }}
+        hostPath:
+          path: {{ include "arr-stack.storagePath" (dict "type" "media" "subpath" "movies" "context" .) }}
+          type: Directory
+        {{- else if eq .Values.storage.media.type "nfs" }}
+        nfs:
+          server: {{ .Values.storage.media.server }}
+          path: {{ .Values.storage.media.path }}/movies
+        {{- end }}
+      - name: downloads
+        {{- if eq .Values.storage.downloads.type "pvc" }}
+        persistentVolumeClaim:
+          {{- if .Values.storage.downloads.existingClaim }}
+          claimName: {{ .Values.storage.downloads.existingClaim }}
+          {{- else }}
+          claimName: {{ include "arr-stack.fullname" . }}-downloads
+          {{- end }}
+        {{- else if eq .Values.storage.downloads.type "hostPath" }}
+        hostPath:
+          path: {{ include "arr-stack.storagePath" (dict "type" "downloads" "context" .) }}
+          type: Directory
+        {{- else if eq .Values.storage.downloads.type "nfs" }}
+        nfs:
+          server: {{ .Values.storage.downloads.server }}
+          path: {{ .Values.storage.downloads.path }}
+        {{- end }}
+{{- end }}

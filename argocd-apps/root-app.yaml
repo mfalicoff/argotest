@@ -1,0 +1,25 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: arr-stack-root
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+
+  source:
+    repoURL: https://github.com/mfalicoff/argotest.git # UPDATE THIS
+    targetRevision: main
+    path: argocd-apps # Points to directory with Application manifests
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd # Applications go in argocd namespace
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

@@ -1,0 +1,101 @@
+# Production environment values for arr-stack
+# These values override the defaults in arr-stack/values.yaml
+
+ingress:
+  enabled: true
+  className: caddy
+  domain: local.mazilious.org
+  tls:
+    enabled: true
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    # If using Tailscale:
+    # tailscale.com/expose: "true"
+
+global:
+  timezone: America/Toronto
+  puid: 1000
+  pgid: 1000
+  storageClass: ""  # Use default or specify: longhorn, nfs-client, etc.
+
+storage:
+  media:
+    type: hostPath
+    path: /mnt/user/media
+  downloads:
+    type: hostPath
+    path: /mnt/user/downloads
+  appdata:
+    type: hostPath
+    path: /mnt/user/appdata
+
+# Production resource limits
+sonarr:
+  enabled: true
+  resources:
+    limits:
+      memory: 1Gi
+      cpu: 1000m
+    requests:
+      memory: 512Mi
+      cpu: 500m
+  persistence:
+    config:
+      enabled: true
+      size: 10Gi
+
+radarr:
+  enabled: true
+  resources:
+    limits:
+      memory: 1Gi
+      cpu: 1000m
+    requests:
+      memory: 512Mi
+      cpu: 500m
+  persistence:
+    config:
+      enabled: true
+      size: 10Gi
+
+jellyseerr:
+  enabled: true
+  resources:
+    limits:
+      memory: 512Mi
+      cpu: 500m
+    requests:
+      memory: 256Mi
+      cpu: 250m
+  persistence:
+    config:
+      enabled: true
+      size: 5Gi
+
+byparr:
+  enabled: true
+  shmSize: 2Gi
+  resources:
+    limits:
+      memory: 2Gi
+      cpu: 1000m
+    requests:
+      memory: 1Gi
+      cpu: 500m
+
+prowlarr:
+  enabled: true
+  resources:
+    limits:
+      memory: 512Mi
+      cpu: 500m
+    requests:
+      memory: 256Mi
+      cpu: 250m
+  persistence:
+    config:
+      enabled: true
+      size: 5Gi
+
+jackett:
+  enabled: false  # Using Prowlarr instead

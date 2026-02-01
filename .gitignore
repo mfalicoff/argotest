@@ -1,0 +1,44 @@
+# Helm
+*.tgz
+.helm/
+
+# Secrets - NEVER commit these!
+secrets.yaml
+*secret*.yaml
+!sealed-secret*.yaml  # Sealed secrets are safe to commit
+*.key
+*.pem
+key.txt
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temp files
+*.tmp
+*.bak
+*.orig
+
+# Local values overrides
+values.local.yaml
+my-values.yaml
+local-*.yaml
+
+# Terraform
+*.tfstate
+*.tfstate.backup
+.terraform/
+.terraform.lock.hcl
+
+# Docker
+.env
+
+# Git-crypt
+.git-crypt/

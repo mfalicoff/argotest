@@ -1,0 +1,20 @@
+{{- if and .Values.jellyseerr.enabled .Values.jellyseerr.persistence.config.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "arr-stack.componentName" (dict "component" "jellyseerr-config" "context" .) }}
+  labels:
+    {{- include "arr-stack.labels" . | nindent 4 }}
+    {{- include "arr-stack.componentLabels" "jellyseerr" | nindent 4 }}
+spec:
+  accessModes:
+  - ReadWriteOnce
+  {{- if .Values.jellyseerr.persistence.config.storageClass }}
+  storageClassName: {{ .Values.jellyseerr.persistence.config.storageClass }}
+  {{- else if .Values.global.storageClass }}
+  storageClassName: {{ .Values.global.storageClass }}
+  {{- end }}
+  resources:
+    requests:
+      storage: {{ .Values.jellyseerr.persistence.config.size }}
+{{- end }}

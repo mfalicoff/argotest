@@ -1,0 +1,38 @@
+{{- if and .Values.sonarr.enabled .Values.sonarr.ingress.enabled .Values.ingress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "arr-stack.componentName" (dict "component" "sonarr" "context" .) }}
+  labels:
+    {{- include "arr-stack.labels" . | nindent 4 }}
+    {{- include "arr-stack.componentLabels" "sonarr" | nindent 4 }}
+  annotations:
+    {{- with .Values.ingress.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+    # Caddy-specific reverse proxy annotation
+    caddy.reverse_proxy: "http://{{ include "arr-stack.componentName" (dict "component" "sonarr" "context" .) }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.sonarr.service.port }}"
+spec:
+  {{- if .Values.ingress.className }}
+  ingressClassName: {{ .Values.ingress.className }}
+  {{- end }}
+  {{- if .Values.ingress.tls.enabled }}
+  tls:
+  - hosts:
+    - {{ .Values.sonarr.ingress.hostname }}.{{ .Values.ingress.domain }}
+    {{- if .Values.ingress.tls.secretName }}
+    secretName: {{ .Values.ingress.tls.secretName }}-sonarr
+    {{- end }}
+  {{- end }}
+  rules:
+  - host: {{ .Values.sonarr.ingress.hostname }}.{{ .Values.ingress.domain }}
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ include "arr-stack.componentName" (dict "component" "sonarr" "context" .) }}
+            port:
+              number: {{ .Values.sonarr.service.port }}
+{{- end }}

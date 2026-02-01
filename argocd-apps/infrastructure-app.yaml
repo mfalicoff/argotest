@@ -1,0 +1,36 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: arr-stack-infrastructure
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+
+  source:
+    repoURL: https://github.com/mfalicoff/argotest.git # UPDATE THIS
+    targetRevision: main
+    path: infrastructure/overlays/production # Uses Kustomize overlay
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: media # PVCs go here, but PVs and StorageClass are cluster-scoped
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
+
+  # Infrastructure deploys first
+  info:
+    - name: Description
+      value: Storage infrastructure for arr-stack (StorageClass, PVs, PVCs)

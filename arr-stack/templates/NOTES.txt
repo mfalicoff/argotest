@@ -1,0 +1,61 @@
+Thank you for installing {{ .Chart.Name }}!
+
+Your arr-stack has been deployed to the {{ .Release.Namespace }} namespace.
+
+Enabled Services:
+{{- if .Values.sonarr.enabled }}
+  ✓ Sonarr - TV Show Manager
+{{- end }}
+{{- if .Values.radarr.enabled }}
+  ✓ Radarr - Movie Manager
+{{- end }}
+{{- if .Values.jellyseerr.enabled }}
+  ✓ Jellyseerr - Media Requests
+{{- end }}
+{{- if .Values.byparr.enabled }}
+  ✓ Byparr - FlareSolverr Alternative
+{{- end }}
+{{- if .Values.prowlarr.enabled }}
+  ✓ Prowlarr - Index Manager
+{{- end }}
+{{- if .Values.jackett.enabled }}
+  ✓ Jackett - Index Manager
+{{- end }}
+
+{{ if .Values.ingress.enabled -}}
+To access your services:
+
+{{- if .Values.sonarr.enabled }}
+  Sonarr:      https://{{ .Values.sonarr.ingress.hostname }}.{{ .Values.ingress.domain }}
+{{- end }}
+{{- if .Values.radarr.enabled }}
+  Radarr:      https://{{ .Values.radarr.ingress.hostname }}.{{ .Values.ingress.domain }}
+{{- end }}
+{{- if .Values.jellyseerr.enabled }}
+  Jellyseerr:  https://{{ .Values.jellyseerr.ingress.hostname }}.{{ .Values.ingress.domain }}
+{{- end }}
+{{- if .Values.byparr.enabled }}
+  Byparr:      https://{{ .Values.byparr.ingress.hostname }}.{{ .Values.ingress.domain }}
+{{- end }}
+{{- if .Values.prowlarr.enabled }}
+  Prowlarr:    https://{{ .Values.prowlarr.ingress.hostname }}.{{ .Values.ingress.domain }}
+{{- end }}
+{{- if .Values.jackett.enabled }}
+  Jackett:     https://{{ .Values.jackett.ingress.hostname }}.{{ .Values.ingress.domain }}
+{{- end }}
+
+{{- else }}
+Ingress is disabled. To access your services, use port-forward:
+  kubectl port-forward -n {{ .Release.Namespace }} svc/{{ include "arr-stack.fullname" . }}-sonarr 8989:8989
+{{- end }}
+
+To check the status of your deployment:
+  kubectl get pods -n {{ .Release.Namespace }} -l "app.kubernetes.io/instance={{ .Release.Name }}"
+
+To view logs:
+  kubectl logs -n {{ .Release.Namespace }} -l "app.kubernetes.io/instance={{ .Release.Name }}" -f
+
+To check persistent volume claims:
+  kubectl get pvc -n {{ .Release.Namespace }} -l "app.kubernetes.io/instance={{ .Release.Name }}"
+
+For more information, visit: https://github.com/yourusername/arr-stack-helm

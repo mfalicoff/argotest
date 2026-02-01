@@ -1,0 +1,37 @@
+{{- if and .Values.jackett.enabled .Values.jackett.ingress.enabled .Values.ingress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "arr-stack.componentName" (dict "component" "jackett" "context" .) }}
+  labels:
+    {{- include "arr-stack.labels" . | nindent 4 }}
+    {{- include "arr-stack.componentLabels" "jackett" | nindent 4 }}
+  annotations:
+    {{- with .Values.ingress.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+    caddy.reverse_proxy: "http://{{ include "arr-stack.componentName" (dict "component" "jackett" "context" .) }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.jackett.service.port }}"
+spec:
+  {{- if .Values.ingress.className }}
+  ingressClassName: {{ .Values.ingress.className }}
+  {{- end }}
+  {{- if .Values.ingress.tls.enabled }}
+  tls:
+  - hosts:
+    - {{ .Values.jackett.ingress.hostname }}.{{ .Values.ingress.domain }}
+    {{- if .Values.ingress.tls.secretName }}
+    secretName: {{ .Values.ingress.tls.secretName }}-jackett
+    {{- end }}
+  {{- end }}
+  rules:
+  - host: {{ .Values.jackett.ingress.hostname }}.{{ .Values.ingress.domain }}
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ include "arr-stack.componentName" (dict "component" "jackett" "context" .) }}
+            port:
+              number: {{ .Values.jackett.service.port }}
+{{- end }}

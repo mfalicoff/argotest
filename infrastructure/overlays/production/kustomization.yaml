@@ -1,0 +1,25 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ../../storage.yaml
+
+namespace: media
+
+# Patch the node name in both PVs
+patches:
+  - target:
+      kind: PersistentVolume
+      name: arr-media-pv
+    patch: |-
+      - op: replace
+        path: /spec/nodeAffinity/required/nodeSelectorTerms/0/matchExpressions/0/values/0
+        value: orbstack  # UPDATE THIS
+
+  - target:
+      kind: PersistentVolume
+      name: arr-downloads-pv
+    patch: |-
+      - op: replace
+        path: /spec/nodeAffinity/required/nodeSelectorTerms/0/matchExpressions/0/values/0
+        value: orbstack  # UPDATE THIS

@@ -1,0 +1,88 @@
+{{- if .Values.jellyseerr.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "arr-stack.componentName" (dict "component" "jellyseerr" "context" .) }}
+  labels:
+    {{- include "arr-stack.labels" . | nindent 4 }}
+    {{- include "arr-stack.componentLabels" "jellyseerr" | nindent 4 }}
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      {{- include "arr-stack.selectorLabels" . | nindent 6 }}
+      {{- include "arr-stack.componentLabels" "jellyseerr" | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "arr-stack.selectorLabels" . | nindent 8 }}
+        {{- include "arr-stack.componentLabels" "jellyseerr" | nindent 8 }}
+      annotations:
+        {{- with .Values.jellyseerr.glance }}
+        glance.name: {{ .name | quote }}
+        glance.icon: {{ .icon | quote }}
+        glance.url: "https://{{ $.Values.jellyseerr.ingress.hostname }}.{{ $.Values.ingress.domain }}"
+        glance.description: {{ .description | quote }}
+        {{- end }}
+    spec:
+      restartPolicy: Always
+      {{- with .Values.jellyseerr.nodeAffinity }}
+      affinity:
+        nodeAffinity:
+          {{- toYaml . | nindent 10 }}
+      {{- end }}
+      {{- if .Values.jellyseerr.initContainer }}
+      initContainers:
+      - name: init
+        image: {{ include "arr-stack.image" (dict "image" .Values.jellyseerr.image) }}
+        command: ["/bin/sh", "-c", "echo 'Initializing...'"]
+      {{- end }}
+      containers:
+      - name: jellyseerr
+        image: {{ include "arr-stack.image" (dict "image" .Values.jellyseerr.image) }}
+        imagePullPolicy: {{ .Values.jellyseerr.image.pullPolicy }}
+        ports:
+        - name: http
+          containerPort: {{ .Values.jellyseerr.service.port }}
+          protocol: TCP
+        env:
+        - name: LOG_LEVEL
+          value: {{ .Values.jellyseerr.env.LOG_LEVEL | quote }}
+        - name: TZ
+          value: {{ .Values.global.timezone | quote }}
+        {{- if .Values.jellyseerr.healthcheck.enabled }}
+        livenessProbe:
+          httpGet:
+            path: /api/v1/status
+            port: http
+          initialDelaySeconds: {{ .Values.jellyseerr.healthcheck.startPeriod }}
+          timeoutSeconds: {{ .Values.jellyseerr.healthcheck.timeout }}
+          periodSeconds: {{ .Values.jellyseerr.healthcheck.interval }}
+          failureThreshold: {{ .Values.jellyseerr.healthcheck.retries }}
+        readinessProbe:
+          httpGet:
+            path: /api/v1/status
+            port: http
+          initialDelaySeconds: {{ .Values.jellyseerr.healthcheck.startPeriod }}
+          timeoutSeconds: {{ .Values.jellyseerr.healthcheck.timeout }}
+          periodSeconds: {{ .Values.jellyseerr.healthcheck.interval }}
+          failureThreshold: {{ .Values.jellyseerr.healthcheck.retries }}
+        {{- end }}
+        volumeMounts:
+        - name: config
+          mountPath: /app/config
+        {{- with .Values.jellyseerr.resources }}
+        resources:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+      volumes:
+      - name: config
+        {{- if .Values.jellyseerr.persistence.config.enabled }}
+        persistentVolumeClaim:
+          claimName: {{ include "arr-stack.componentName" (dict "component" "jellyseerr-config" "context" .) }}
+        {{- else }}
+        emptyDir: {}
+        {{- end }}
+{{- end }}

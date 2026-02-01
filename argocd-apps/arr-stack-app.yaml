@@ -1,0 +1,42 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: arr-stack
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "10" # Deploy AFTER infrastructure (wave 0-2)
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+
+  source:
+    repoURL: https://github.com/mfalicoff/argotest.git # UPDATE THIS
+    targetRevision: main
+    path: arr-stack
+    helm:
+      valueFiles:
+        - values.yaml
+        - ../environments/production/values.yaml
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: media
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+      allowEmpty: false
+    syncOptions:
+      - CreateNamespace=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
+
+  info:
+    - name: Description
+      value: arr media management stack (Sonarr, Radarr, etc.)

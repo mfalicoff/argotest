@@ -1,0 +1,37 @@
+{{- if and .Values.byparr.enabled .Values.byparr.ingress.enabled .Values.ingress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "arr-stack.componentName" (dict "component" "byparr" "context" .) }}
+  labels:
+    {{- include "arr-stack.labels" . | nindent 4 }}
+    {{- include "arr-stack.componentLabels" "byparr" | nindent 4 }}
+  annotations:
+    {{- with .Values.ingress.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+    caddy.reverse_proxy: "http://{{ include "arr-stack.componentName" (dict "component" "byparr" "context" .) }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.byparr.service.port }}"
+spec:
+  {{- if .Values.ingress.className }}
+  ingressClassName: {{ .Values.ingress.className }}
+  {{- end }}
+  {{- if .Values.ingress.tls.enabled }}
+  tls:
+  - hosts:
+    - {{ .Values.byparr.ingress.hostname }}.{{ .Values.ingress.domain }}
+    {{- if .Values.ingress.tls.secretName }}
+    secretName: {{ .Values.ingress.tls.secretName }}-byparr
+    {{- end }}
+  {{- end }}
+  rules:
+  - host: {{ .Values.byparr.ingress.hostname }}.{{ .Values.ingress.domain }}
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ include "arr-stack.componentName" (dict "component" "byparr" "context" .) }}
+            port:
+              number: {{ .Values.byparr.service.port }}
+{{- end }}

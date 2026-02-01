@@ -1,0 +1,20 @@
+{{- if and .Values.jackett.enabled .Values.jackett.persistence.config.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "arr-stack.componentName" (dict "component" "jackett-config" "context" .) }}
+  labels:
+    {{- include "arr-stack.labels" . | nindent 4 }}
+    {{- include "arr-stack.componentLabels" "jackett" | nindent 4 }}
+spec:
+  accessModes:
+  - ReadWriteOnce
+  {{- if .Values.jackett.persistence.config.storageClass }}
+  storageClassName: {{ .Values.jackett.persistence.config.storageClass }}
+  {{- else if .Values.global.storageClass }}
+  storageClassName: {{ .Values.global.storageClass }}
+  {{- end }}
+  resources:
+    requests:
+      storage: {{ .Values.jackett.persistence.config.size }}
+{{- end }}

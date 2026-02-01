@@ -1,0 +1,90 @@
+# Staging environment values for arr-stack
+# Lighter resources, test domain, etc.
+
+ingress:
+  enabled: true
+  className: caddy
+  domain: staging.local.mazilious.org
+  tls:
+    enabled: true
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-staging
+
+global:
+  timezone: America/Toronto
+  puid: 1000
+  pgid: 1000
+
+storage:
+  media:
+    type: hostPath
+    path: /mnt/staging/media
+  downloads:
+    type: hostPath
+    path: /mnt/staging/downloads
+  appdata:
+    type: hostPath
+    path: /mnt/staging/appdata
+
+# Reduced resources for staging
+sonarr:
+  enabled: true
+  resources:
+    limits:
+      memory: 512Mi
+      cpu: 500m
+    requests:
+      memory: 256Mi
+      cpu: 250m
+  persistence:
+    config:
+      enabled: true
+      size: 5Gi
+
+radarr:
+  enabled: true
+  resources:
+    limits:
+      memory: 512Mi
+      cpu: 500m
+    requests:
+      memory: 256Mi
+      cpu: 250m
+  persistence:
+    config:
+      enabled: true
+      size: 5Gi
+
+jellyseerr:
+  enabled: true
+  resources:
+    limits:
+      memory: 256Mi
+      cpu: 250m
+    requests:
+      memory: 128Mi
+      cpu: 100m
+  persistence:
+    config:
+      enabled: true
+      size: 2Gi
+
+byparr:
+  enabled: false  # Not needed in staging
+
+prowlarr:
+  enabled: true
+  resources:
+    limits:
+      memory: 256Mi
+      cpu: 250m
+    requests:
+      memory: 128Mi
+      cpu: 100m
+  persistence:
+    config:
+      enabled: true
+      size: 2Gi
+
+jackett:
+  enabled: false
