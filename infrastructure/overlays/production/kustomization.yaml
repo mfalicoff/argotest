@@ -1,9 +1,9 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
-# Reference the base directory (not individual files)
+# Reference the base kustomization
 resources:
-  - ../../
+  - ../../base
 
 namespace: media
 
