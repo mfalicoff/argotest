@@ -1,0 +1,25 @@
+# Tailscale Ingress - Exposes Caddy to Tailscale network
+# This creates a Tailscale node that forwards traffic to Caddy
+# Cloudflare -> Tailscale IP -> Caddy -> Internal services
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: caddy-tailscale-proxy
+  namespace: caddy-system
+  annotations:
+    # Tailscale operator will create a Tailscale node for this service
+    tailscale.com/expose: "true"
+    tailscale.com/hostname: "arr-stack"
+    tailscale.com/tags: "tag:k8s,tag:arr-stack"
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: caddy-ingress-controller
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
+    - name: https
+      port: 443
+      targetPort: 443

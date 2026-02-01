@@ -1,0 +1,35 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: tailscale-operator
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://pkgs.tailscale.com/helmcharts
+    chart: tailscale-operator
+    targetRevision: 1.78.3
+    helm:
+      valuesObject:
+        # OAuth credentials - create at https://login.tailscale.com/admin/settings/oauth
+        # Required scopes: devices, auth_keys
+        oauth:
+          clientId: ""      # Set via sealed secret or external secret
+          clientSecret: ""  # Set via sealed secret or external secret
+        # Or use existing secret
+        # existingSecret: tailscale-operator-oauth
+        operatorConfig:
+          hostname: "arr-stack-k8s"
+          defaultTags:
+            - "tag:k8s"
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: tailscale-operator
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

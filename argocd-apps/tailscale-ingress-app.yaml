@@ -1,0 +1,24 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: tailscale-ingress
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "5"  # After caddy (wave 0) and tailscale-operator (wave 0)
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/mfalicoff/argotest.git
+    path: infrastructure/tailscale-ingress
+    targetRevision: master
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: caddy-system
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

@@ -1,0 +1,37 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: caddy-ingress
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://caddyserver.github.io/ingress
+    chart: caddy-ingress-controller
+    targetRevision: 1.1.0
+    helm:
+      valuesObject:
+        ingressController:
+          config:
+            # Global Caddy config
+            email: ""  # Set for automatic HTTPS with Let's Encrypt
+          watchNamespaces: []  # Watch all namespaces
+        replicaCount: 1
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 500m
+            memory: 256Mi
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: caddy-system
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
