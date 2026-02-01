@@ -42,3 +42,4 @@ local-*.yaml
 
 # Git-crypt
 .git-crypt/
+test-data/

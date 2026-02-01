@@ -21,13 +21,13 @@ global:
 storage:
   media:
     type: hostPath
-    path: /tmp/arr/media
+    path: /Users/mazilious/.claude-worktrees/argotest/jolly-vaughan/test-data/media
   downloads:
     type: hostPath
-    path: /tmp/arr/downloads
+    path: /Users/mazilious/.claude-worktrees/argotest/jolly-vaughan/test-data/downloads
   appdata:
     type: hostPath
-    path: /tmp/arr/appdata
+    path: /Users/mazilious/.claude-worktrees/argotest/jolly-vaughan/test-data/appdata
 
 # Production resource limits
 sonarr:

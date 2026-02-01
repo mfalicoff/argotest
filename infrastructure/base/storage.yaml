@@ -20,7 +20,7 @@ spec:
     - ReadWriteMany
   persistentVolumeReclaimPolicy: Retain
   local:
-    path: /tmp/arr/media
+    path: /Users/mazilious/.claude-worktrees/argotest/jolly-vaughan/test-data/media
   nodeAffinity:
     required:
       nodeSelectorTerms:
@@ -49,7 +49,7 @@ spec:
     - ReadWriteMany
   persistentVolumeReclaimPolicy: Retain
   local:
-    path: /tmp/arr/downloads
+    path: /Users/mazilious/.claude-worktrees/argotest/jolly-vaughan/test-data/downloads
   nodeAffinity:
     required:
       nodeSelectorTerms:
