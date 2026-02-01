@@ -13,17 +13,19 @@ spec:
     targetRevision: 1.78.3
     helm:
       valuesObject:
-        # OAuth credentials - create at https://login.tailscale.com/admin/settings/oauth
-        # Required scopes: devices, auth_keys
+        # Use existing secret for OAuth credentials
+        # Create secret first: kubectl create secret generic operator-oauth \
+        #   --namespace=tailscale-operator \
+        #   --from-literal=client_id=YOUR_CLIENT_ID \
+        #   --from-literal=client_secret=YOUR_CLIENT_SECRET
         oauth:
-          clientId: ""      # Set via sealed secret or external secret
-          clientSecret: ""  # Set via sealed secret or external secret
-        # Or use existing secret
-        # existingSecret: tailscale-operator-oauth
+          clientId: ""
+          clientSecret: ""
         operatorConfig:
           hostname: "arr-stack-k8s"
-          defaultTags:
-            - "tag:k8s"
+          # Remove tags if not configured in Tailscale ACLs
+          # defaultTags:
+          #   - "tag:k8s"
   destination:
     server: https://kubernetes.default.svc
     namespace: tailscale-operator
