@@ -1,20 +1,8 @@
-# Infrastructure: Storage Class, PVs, and PVCs
-# These deploy BEFORE the arr-stack application using sync waves
+# Infrastructure: PVs and PVCs
+# Uses existing local-path StorageClass from k3s
 
 ---
-# StorageClass - Deploy first (wave 0)
-apiVersion: storage.k8s.io/v1
-kind: StorageClass
-metadata:
-  name: local-path
-  annotations:
-    argocd.argoproj.io/sync-wave: "0"
-provisioner: kubernetes.io/no-provisioner
-volumeBindingMode: WaitForFirstConsumer
-reclaimPolicy: Retain
-
----
-# PersistentVolume for media - Deploy second (wave 1)
+# PersistentVolume for media - Deploy first (wave 1)
 apiVersion: v1
 kind: PersistentVolume
 metadata:
