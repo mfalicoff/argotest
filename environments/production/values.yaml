@@ -21,13 +21,13 @@ global:
 storage:
   media:
     type: hostPath
-    path: /mnt/user/media
+    path: /tmp/arr/media
   downloads:
     type: hostPath
-    path: /mnt/user/downloads
+    path: /tmp/arr/downloads
   appdata:
     type: hostPath
-    path: /mnt/user/appdata
+    path: /tmp/arr/appdata
 
 # Production resource limits
 sonarr:

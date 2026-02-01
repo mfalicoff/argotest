@@ -21,13 +21,13 @@ storage:
   # For NFS/hostPath/etc., adjust based on your cluster setup
   media:
     type: hostPath  # Options: hostPath, nfs, pvc
-    path: /mnt/user/media
+    path: /tmp/arr/media
   downloads:
     type: hostPath
-    path: /mnt/user/downloads
+    path: /tmp/arr/downloads
   appdata:
     type: hostPath
-    path: /mnt/user/appdata
+    path: /tmp/arr/appdata
 
 # Sonarr configuration
 sonarr:

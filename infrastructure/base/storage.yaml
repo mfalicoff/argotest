@@ -20,7 +20,7 @@ spec:
     - ReadWriteMany
   persistentVolumeReclaimPolicy: Retain
   local:
-    path: /mnt/user/media
+    path: /tmp/arr/media
   nodeAffinity:
     required:
       nodeSelectorTerms:
@@ -49,7 +49,7 @@ spec:
     - ReadWriteMany
   persistentVolumeReclaimPolicy: Retain
   local:
-    path: /mnt/user/downloads
+    path: /tmp/arr/downloads
   nodeAffinity:
     required:
       nodeSelectorTerms:
